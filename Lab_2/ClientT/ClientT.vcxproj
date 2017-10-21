@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{A5100CF1-3A0F-45A6-B9EC-8F821BB89CBE}</ProjectGuid>
+    <ProjectGuid>{A547EAB3-D1AD-4D8F-9194-2C342AE0D41E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ClientT</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -146,11 +146,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="consoleColors.h" />
     <ClInclude Include="func_ErrorMsgText.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
