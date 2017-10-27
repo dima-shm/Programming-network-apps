@@ -1,4 +1,4 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+п»ї#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #include "func_ErrorMsgText.h"
 #include "Winsock2.h"
@@ -27,7 +27,7 @@ void main()
 {
 	setlocale(0, "");
 
-	SOCKET cS;       // дескриптор сокета клиента
+	SOCKET cS;       // РґРµСЃРєСЂРёРїС‚РѕСЂ СЃРѕРєРµС‚Р° РєР»РёРµРЅС‚Р°
 	WSADATA wsaData;
 
 	int numMsg;
@@ -49,35 +49,51 @@ void main()
 
 
 		/********************************* 3 *********************************/
-		clnt.sin_family = AF_INET;					   // используется IP-адресация
-		clnt.sin_port = htons(2000);				   // TCP-порт 2000
-		clnt.sin_addr.s_addr = inet_addr("127.0.0.1"); // адрес сервера
+		clnt.sin_family = AF_INET;					   // РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ IP-Р°РґСЂРµСЃР°С†РёСЏ
+		clnt.sin_port = htons(2000);				   // TCP-РїРѕСЂС‚ 2000
+		clnt.sin_addr.s_addr = inet_addr("127.0.0.1"); // Р°РґСЂРµСЃ СЃРµСЂРІРµСЂР°
 
-		cout << "Введите количество передаваемых сообщений: "; cin >> numMsg; cout << endl;
+		cout << "Р’РІРµРґРёС‚Рµ РєРѕР»РёС‡РµСЃС‚РІРѕ РїРµСЂРµРґР°РІР°РµРјС‹С… СЃРѕРѕР±С‰РµРЅРёР№: "; cin >> numMsg; cout << endl;
 
-		char buf[50] = "Hello from Client 000"; // буфер ввода
+		char buf[50] = "Hello from Client 000"; // Р±СѓС„РµСЂ РІРІРѕРґР°
 		string bufStr;
-		int libuf = 0;                          // количество отправленных байт
-		int lobuf = 0;                          // количество принятых байт
+		int libuf = 0;                          // РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РїСЂР°РІР»РµРЅРЅС‹С… Р±Р°Р№С‚
+		int lobuf = 0;                          // РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёРЅСЏС‚С‹С… Р±Р°Р№С‚
 
+
+		// РґРµРјРѕРЅСЃС‚СЂР°С†РёСЏ РїРѕС‚РµСЂРё РїР°РєРµС‚РѕРІ
+		//for (int i = 1; i <= numMsg; i++)
+		//{
+		//	if (sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt)) == SOCKET_ERROR)
+		//		throw SetErrorMsgText("sendto: ", WSAGetLastError());
+		//	
+		//	setConsoleClrBlue();
+		//	cout << "    РљРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РїСЂР°РІР»РµРЅС‹Р№ Р±Р°Р№С‚ СЃРѕРѕР±С‰РµРЅРёСЏ: " << libuf << endl;
+		//	cout << "    РўРµРєСЃС‚ СЃРѕРѕР±С€РµРЅРёСЏ:                       " << buf << endl; bufStr = (string)buf;
+		//	setConsoleClrWhite(); prepareString(bufStr, i);
+		//
+		//	bufStr = (string)buf;
+		//	prepareString(bufStr, i);
+		//	strcpy(buf, bufStr.c_str());
+		//}
 		for (int i = 1; i <= numMsg; i++)
 		{
 			if ((libuf = sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt))) == SOCKET_ERROR)
 				throw SetErrorMsgText("sendto: ", WSAGetLastError());
 			
 			setConsoleClrBlue();
-			cout << "    Количество отправленый байт сообщения: " << libuf << endl;
-			cout << "    Текст сообшения:                       " << buf << endl;
+			cout << "    РљРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РїСЂР°РІР»РµРЅС‹Р№ Р±Р°Р№С‚ СЃРѕРѕР±С‰РµРЅРёСЏ: " << libuf << endl;
+			cout << "    РўРµРєСЃС‚ СЃРѕРѕР±С€РµРЅРёСЏ:                       " << buf << endl;
 			setConsoleClrWhite();
-
-
+		
+		
 			/********************************* 4 *********************************/
 			if ((lobuf = recvfrom(cS, buf, sizeof(buf), NULL, (sockaddr*)&from, &sizeOfFrom)) == SOCKET_ERROR)
 				throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
 			
 			setConsoleClrGreen();
-			cout << "Количество полученых байт сообщения:   " << lobuf << endl;
-			cout << "Текст сообшения:                       " << buf << endl;
+			cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»СѓС‡РµРЅС‹С… Р±Р°Р№С‚ СЃРѕРѕР±С‰РµРЅРёСЏ:   " << lobuf << endl;
+			cout << "РўРµРєСЃС‚ СЃРѕРѕР±С€РµРЅРёСЏ:                       " << buf << endl;
 			setConsoleClrWhite();
 			
 			bufStr = (string)buf;

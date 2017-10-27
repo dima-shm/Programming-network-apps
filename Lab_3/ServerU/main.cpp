@@ -1,4 +1,4 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+п»ї#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "func_ErrorMsgText.h"
 #include "Winsock2.h"
 
@@ -7,7 +7,7 @@ void main()
 {
 	setlocale(0, "");
 
-	SOCKET sS;       // дескриптор сокета сервера
+	SOCKET sS;       // РґРµСЃРєСЂРёРїС‚РѕСЂ СЃРѕРєРµС‚Р° СЃРµСЂРІРµСЂР°
 	WSADATA wsaData;
 
 	string action;
@@ -27,48 +27,68 @@ void main()
 		if ((sS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
 			throw SetErrorMsgText("socket: ", WSAGetLastError());
 
-		serv.sin_family = AF_INET;		   // используется IP-адресация
-		serv.sin_port = htons(2000);	   // порт 2000
-		serv.sin_addr.s_addr = INADDR_ANY; // любой собственный IP-адрес
+		serv.sin_family = AF_INET;		   // РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ IP-Р°РґСЂРµСЃР°С†РёСЏ
+		serv.sin_port = htons(2000);	   // РїРѕСЂС‚ 2000
+		serv.sin_addr.s_addr = INADDR_ANY; // Р»СЋР±РѕР№ СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ IP-Р°РґСЂРµСЃ
 
 		if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR)
 			throw SetErrorMsgText("bind:", WSAGetLastError());
 
 
 		/********************************* 3 *********************************/
-		char buf[50];  // буфер ввода
-		int lobuf = 0; // количество принятых байт
-		int libuf = 0; // количество отправленных байт
+		char buf[50];  // Р±СѓС„РµСЂ РІРІРѕРґР°
+		int lobuf = 0; // РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёРЅСЏС‚С‹С… Р±Р°Р№С‚
+		int libuf = 0; // РєРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚РїСЂР°РІР»РµРЅРЅС‹С… Р±Р°Р№С‚
+		bool flag = true; // РґРµРјРѕРЅСЃС‚СЂР°С†РёСЏ РїРѕС‚РµСЂРё РїР°РєРµС‚РѕРІ
 
 
-		cout << "Введите \"y\", чтобы продолжить работу" << endl;
-		cout << "Ввод: "; cin >> action;
+		cout << "Р’РІРµРґРёС‚Рµ \"y\", С‡С‚РѕР±С‹ РїСЂРѕРґРѕР»Р¶РёС‚СЊ СЂР°Р±РѕС‚Сѓ" << endl;
+		cout << "Р’РІРѕРґ: "; cin >> action;
 
 		while (action == "y")
 		{
+			// РґРµРјРѕРЅСЃС‚СЂР°С†РёСЏ РїРѕС‚РµСЂРё РїР°РєРµС‚РѕРІ
+			//do {
+			//	memset(&buf, 0, sizeof(buf));
+			//	from = SOCKADDR_IN();
+			//
+			//	if ((lobuf = recvfrom(sS, buf, sizeof(buf), NULL, (sockaddr*)&from, &sizeOfFrom)) == SOCKET_ERROR)
+			//		throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
+			//
+			//	cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»СѓС‡РµРЅС‹С… Р±Р°Р№С‚ СЃРѕРѕР±С‰РµРЅРёСЏ: " << lobuf << endl;
+			//	cout << "РўРµРєСЃС‚ СЃРѕРѕР±С€РµРЅРёСЏ:                     " << buf << endl;
+			//
+			//	if (lobuf == 0)
+			//		break;
+			//
+			//	if (flag == true) {
+			//		Sleep(8000);
+			//		flag = false;
+			//	}
+			//} while (lobuf != 0);
 			do {
 				memset(&buf, 0, sizeof(buf));
-				from.sin_family = AF_INET;		   // используется IP-адресация
-				from.sin_port = htons(2000);	   // порт 2000
-				from.sin_addr.s_addr = INADDR_ANY; // любой собственный IP-адрес
-
+				from.sin_family = AF_INET;		   // РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ IP-Р°РґСЂРµСЃР°С†РёСЏ
+				from.sin_port = htons(2000);	   // РїРѕСЂС‚ 2000
+				from.sin_addr.s_addr = INADDR_ANY; // Р»СЋР±РѕР№ СЃРѕР±СЃС‚РІРµРЅРЅС‹Р№ IP-Р°РґСЂРµСЃ
+			
 				if ((lobuf = recvfrom(sS, buf, sizeof(buf), NULL, (sockaddr*)&from, &sizeOfFrom)) == SOCKET_ERROR)
 					throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
-
-				cout << "Количество полученых байт сообщения: " << lobuf << endl;
-				cout << "Текст сообшения:                       " << buf << endl;
-
+			
+				cout << "РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕР»СѓС‡РµРЅС‹С… Р±Р°Р№С‚ СЃРѕРѕР±С‰РµРЅРёСЏ: " << lobuf << endl;
+				cout << "РўРµРєСЃС‚ СЃРѕРѕР±С€РµРЅРёСЏ:                     " << buf << endl;
+			
 				if (lobuf == 0)
 					break;
-
-
+			
+			
 				/********************************* 4 *********************************/
 				if (libuf = sendto(sS, buf, strlen(buf), NULL, (sockaddr*)&from, sizeof(from)) == SOCKET_ERROR)
 					throw SetErrorMsgText("sendto: ", WSAGetLastError());
 			} while (lobuf != 0);
 
-			cout << "Продолжить работу?" << endl;
-			cout << "Ввод: "; cin >> action;
+			cout << "РџСЂРѕРґРѕР»Р¶РёС‚СЊ СЂР°Р±РѕС‚Сѓ?" << endl;
+			cout << "Р’РІРѕРґ: "; cin >> action;
 		}
 
 

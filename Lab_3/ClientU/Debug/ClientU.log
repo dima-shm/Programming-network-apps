@@ -1,3 +1,2 @@
 ﻿  main.cpp
-d:\study\3 курс\1 семестр\networks\лабораторные\lab_3\clientu\main.cpp(36): warning C4101: from: неиспользованная локальная переменная
-  ClientU.vcxproj -> D:\Study\3 курс\1 семестр\Networks\Лабораторные\Lab_3\Debug\ClientU.exe
+  ClientU.vcxproj -> D:\GitHub\Programming-network-apps\Lab_3\Debug\ClientU.exe
