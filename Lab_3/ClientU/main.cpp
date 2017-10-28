@@ -66,11 +66,6 @@ void main()
 		//{
 		//	if (sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt)) == SOCKET_ERROR)
 		//		throw SetErrorMsgText("sendto: ", WSAGetLastError());
-		//	
-		//	setConsoleClrBlue();
-		//	cout << "    Количество отправленый байт сообщения: " << libuf << endl;
-		//	cout << "    Текст сообшения:                       " << buf << endl; bufStr = (string)buf;
-		//	setConsoleClrWhite(); prepareString(bufStr, i);
 		//
 		//	bufStr = (string)buf;
 		//	prepareString(bufStr, i);
