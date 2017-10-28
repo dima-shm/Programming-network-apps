@@ -48,23 +48,20 @@ void main()
 		while (action == "y")
 		{
 			// демонстрация потери пакетов
-			//while (true)
-			//{
-			//	memset(&buf, 0, sizeof(buf));
-			//
-			//	if ((lobuf = recvfrom(sS, buf, sizeof(buf), NULL, (sockaddr*)&from, &sizeOfFrom)) == SOCKET_ERROR)
-			//		throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
-			//
-			//	if (libuf = sendto(sS, buf, strlen(buf) + 1, NULL, (sockaddr*)&from, sizeof(from)) == SOCKET_ERROR)
-			//		throw SetErrorMsgText("sendto: ", WSAGetLastError());
-			//
-			//	Sleep(6);
-			//
-			//	if (strcmp(buf, "") == 0)
-			//		break;
-			//
-			//	cout << "Текст сообшения: " << buf << endl;			
-			//}
+			/*while (true)
+			{
+				memset(&buf, 0, sizeof(buf));
+			
+				if ((lobuf = recvfrom(sS, buf, sizeof(buf), NULL, (sockaddr*)&from, &sizeOfFrom)) == SOCKET_ERROR)
+					throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
+			
+				Sleep(6);
+			
+				if (strcmp(buf, "") == 0)
+					break;
+			
+				cout << "Текст сообшения: " << buf << endl;			
+			}*/
 			do {
 				memset(&buf, 0, sizeof(buf));
 				from.sin_family = AF_INET;		   // используется IP-адресация

@@ -62,15 +62,15 @@ void main()
 
 
 		// демонстрация потери пакетов
-		//for (int i = 1; i <= numMsg; i++)
-		//{
-		//	if (sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt)) == SOCKET_ERROR)
-		//		throw SetErrorMsgText("sendto: ", WSAGetLastError());
-		//
-		//	bufStr = (string)buf;
-		//	prepareString(bufStr, i);
-		//	strcpy(buf, bufStr.c_str());
-		//}
+		/*for (int i = 1; i <= numMsg; i++)
+		{
+			if (sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt)) == SOCKET_ERROR)
+				throw SetErrorMsgText("sendto: ", WSAGetLastError());
+		
+			bufStr = (string)buf;
+			prepareString(bufStr, i);
+			strcpy(buf, bufStr.c_str());
+		}*/
 		for (int i = 1; i <= numMsg; i++)
 		{
 			if ((libuf = sendto(cS, buf, strlen(buf), NULL, (sockaddr*)&clnt, sizeof(clnt))) == SOCKET_ERROR)
