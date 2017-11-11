@@ -35,10 +35,14 @@ void FindTheSameServer(char* name)
 	SOCKET bS;
 	SOCKADDR_IN broadcast;
 	SOCKADDR_IN sameServ;
+	int sameServSizeOf = sizeof(sameServ);
 
 	broadcast.sin_family = AF_INET;
 	broadcast.sin_port = htons(2000);
 	broadcast.sin_addr.s_addr = INADDR_BROADCAST;
+
+	char msgFromServ[50];
+	memset(&msgFromServ, 0, sizeof(msgFromServ));
 
 	if ((bS = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
 		throw SetErrorMsgText("socket: ", WSAGetLastError());
@@ -47,18 +51,13 @@ void FindTheSameServer(char* name)
 	if (setsockopt(bS, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
 		throw SetErrorMsgText("setsockopt: ", WSAGetLastError());
 
-	int timeout = 5000;
+	int timeout = 1000;
 	if (setsockopt(bS, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) == SOCKET_ERROR)
 		throw SetErrorMsgText("setsockopt: ", WSAGetLastError());
 
-	char msgFromServ[50];
-
-	memset(&msgFromServ, 0, sizeof(msgFromServ));
 
 	if (sendto(bS, name, strlen(name), NULL, (sockaddr*)&broadcast, sizeof(broadcast)) == SOCKET_ERROR)
 		throw SetErrorMsgText("sendto: ", WSAGetLastError());
-
-	int sameServSizeOf = sizeof(sameServ);
 
 	if (recvfrom(bS, msgFromServ, sizeof(msgFromServ), NULL, (sockaddr*)&sameServ, &sameServSizeOf) == SOCKET_ERROR)
 	{

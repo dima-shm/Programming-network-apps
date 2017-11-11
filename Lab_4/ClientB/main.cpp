@@ -10,7 +10,7 @@ bool GetServer(char* name, short port, struct sockaddr* from, int* flen)
 {
 	int countOfSendedBytes = 0;
 	int countOfReceivedBytes = 0;
-	char msgFromServer[100];
+	char msgFromServer[50];
 
 	memset(&msgFromServer, 0, sizeof(msgFromServer));
 
