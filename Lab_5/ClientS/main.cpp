@@ -27,7 +27,7 @@ bool GetServerByName(char* name, char* call, struct sockaddr* from, int* flen)
 	if ((countOfReceivedBytes = recvfrom(cS, msgFromServer, sizeof(msgFromServer), NULL, from, flen)) == SOCKET_ERROR)
 		throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
 
-	cout << "Ответ от сервера: " << msgFromServer << endl << endl;
+	cout << "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ: " << msgFromServer << endl << endl;
 
 	return (strcmp(name, msgFromServer) == 0);
 }
@@ -40,8 +40,8 @@ void main()
 	short servPort = 2000;
 	char* servName = "dima-shm";
 
-	serv.sin_family = AF_INET;	 // используется IP-адресация
-	serv.sin_port = htons(2000); // порт 2000
+	serv.sin_family = AF_INET;	 // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ IP-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	serv.sin_port = htons(2000); // пїЅпїЅпїЅпїЅ 2000
 
 	try 
 	{
@@ -55,14 +55,14 @@ void main()
 		if (setsockopt(cS, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int)) == SOCKET_ERROR)
 			throw SetErrorMsgText("setsockopt: ", WSAGetLastError());
 
-		if (GetServerByName("DIMA", servName, (sockaddr*)&serv, &sizeOfServ))
+		if (!GetServerByName("DIMA", servName, (sockaddr*)&serv, &sizeOfServ))
 		{
-			cout << "IP-адрес сервера: " << inet_ntoa(serv.sin_addr) << endl;
-			cout << "Порт:             " << serv.sin_port << endl;
+			cout << "IP-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ: " << inet_ntoa(serv.sin_addr) << endl;
+			cout << "пїЅпїЅпїЅпїЅ:             " << serv.sin_port << endl;
 		}
 		else
 		{
-			cout << "Сервер с таким именем не найден" << endl;
+			cout << "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ" << endl;
 		}
 
 		if (closesocket(cS) == SOCKET_ERROR)

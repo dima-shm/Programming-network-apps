@@ -1,0 +1,3 @@
+﻿  main.cpp
+c:\users\dima-\desktop\lab_6\clientnpсt\main.cpp(10): warning C4101: numMsg: неиспользованная локальная переменная
+  ClientNPсt.vcxproj -> C:\Users\dima-\Desktop\Lab_6\Debug\ClientNPсt.exe
