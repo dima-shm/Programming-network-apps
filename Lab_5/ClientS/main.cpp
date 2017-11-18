@@ -27,21 +27,21 @@ bool GetServerByName(char* name, char* call, struct sockaddr* from, int* flen)
 	if ((countOfReceivedBytes = recvfrom(cS, msgFromServer, sizeof(msgFromServer), NULL, from, flen)) == SOCKET_ERROR)
 		throw SetErrorMsgText("recvfrom: ", WSAGetLastError());
 
-	cout << "����� �� �������: " << msgFromServer << endl << endl;
+	cout << "Ответ от сервера: " << msgFromServer << endl << endl;
 
 	return (strcmp(name, msgFromServer) == 0);
 }
 
 void main()
 {
-	setlocale(0, "");
+	system("chcp 65001");
 
 	int sizeOfServ = sizeof(serv);
 	short servPort = 2000;
 	char* servName = "dima-shm";
 
-	serv.sin_family = AF_INET;	 // ������������ IP-���������
-	serv.sin_port = htons(2000); // ���� 2000
+	serv.sin_family = AF_INET;	 // используется IP-адресация
+	serv.sin_port = htons(2000); // порт 2000
 
 	try 
 	{
@@ -57,12 +57,12 @@ void main()
 
 		if (!GetServerByName("DIMA", servName, (sockaddr*)&serv, &sizeOfServ))
 		{
-			cout << "IP-����� �������: " << inet_ntoa(serv.sin_addr) << endl;
-			cout << "����:             " << serv.sin_port << endl;
+			cout << "IP-адрес сервера: " << inet_ntoa(serv.sin_addr) << endl;
+			cout << "Порт:             " << serv.sin_port << endl;
 		}
 		else
 		{
-			cout << "������ � ����� ������ �� ������" << endl;
+			cout << "Сервер с таким именем не найден" << endl;
 		}
 
 		if (closesocket(cS) == SOCKET_ERROR)
