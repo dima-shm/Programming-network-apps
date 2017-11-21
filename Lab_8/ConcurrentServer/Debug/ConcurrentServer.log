@@ -1,0 +1,4 @@
+﻿  main.cpp
+c:\users\dima-\desktop\lab_8\concurrentserver\dispathserver.h(49): warning C4553: ==: оператор не имеет результата; возможно, имелся в виду "="
+c:\users\dima-\desktop\lab_8\concurrentserver\dispathserver.h(51): warning C4553: ==: оператор не имеет результата; возможно, имелся в виду "="
+  ConcurrentServer.vcxproj -> C:\Users\dima-\Desktop\Lab_8\Debug\ConcurrentServer.exe
