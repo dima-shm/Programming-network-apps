@@ -55,25 +55,23 @@ int main(int argc, char* argv[])
 		cout << "Позывной:   " << call << "          (default)" << endl;
 
 
-
-	
-
-	InitializeCriticalSection(&scListContact);
-
-	st1 = LoadLibrary((LPCWSTR)dllname);
+	st1 = LoadLibrary(L"ServiceLibrary.dll");
 	ts1 = (HANDLE(*)(char*, LPVOID))GetProcAddress(st1, "SSS");
 	if (st1 == NULL)
 		cout << "Не удалось загрузить DLL-библиотеку" << endl << endl;
 	else
 		cout << "Загружена DLL-библиотека: " << dllname << endl << endl;
 
-	// volatile — необходимость размещения переменной cmd в памяти без выполнения оптимизации
-	volatile TalkersCmd cmd = Start; // Команды сервера
 
-	hAcceptServer = CreateThread(NULL, NULL, AcceptServer, (LPVOID)&cmd, NULL, NULL);
-	hConsolePipe = CreateThread(NULL, NULL, ConsolePipe, (LPVOID)&cmd, NULL, NULL);
-	hGarbageCleaner = CreateThread(NULL, NULL, GarbageCleaner, (LPVOID)&cmd, NULL, NULL);
-	hDispathServer = CreateThread(NULL, NULL, DispathServer, (LPVOID)&cmd, NULL, NULL);
+	// volatile — необходимость размещения переменной tCmd в памяти без выполнения оптимизации
+	volatile TalkersCmd tCmd = START; // Команды сервера
+
+	InitializeCriticalSection(&csListContact);
+
+	hAcceptServer = CreateThread(NULL, NULL, AcceptServer, (LPVOID)&tCmd, NULL, NULL);
+	hConsolePipe = CreateThread(NULL, NULL, ConsolePipe, (LPVOID)&tCmd, NULL, NULL);
+	hGarbageCleaner = CreateThread(NULL, NULL, GarbageCleaner, (LPVOID)&tCmd, NULL, NULL);
+	hDispathServer = CreateThread(NULL, NULL, DispathServer, (LPVOID)&tCmd, NULL, NULL);
 
 	// Установить приоритеты потоков
 	SetThreadPriority(hAcceptServer, THREAD_PRIORITY_HIGHEST);
@@ -81,19 +79,20 @@ int main(int argc, char* argv[])
 	SetThreadPriority(hGarbageCleaner, THREAD_PRIORITY_BELOW_NORMAL);
 	SetThreadPriority(hDispathServer, THREAD_PRIORITY_NORMAL);
 
-	// Приостанавливить выполнение main до завершения работы потока
+	// Приостанавить выполнение main до завершения работы потоков
 	WaitForSingleObject(hAcceptServer, INFINITE);
 	WaitForSingleObject(hConsolePipe, INFINITE);
 	WaitForSingleObject(hGarbageCleaner, INFINITE);
 	WaitForSingleObject(hDispathServer, INFINITE);
 
+	// Освободить связанные с потоком ресурсы
 	CloseHandle(hAcceptServer);
 	CloseHandle(hConsolePipe);
 	CloseHandle(hGarbageCleaner);
 	CloseHandle(hDispathServer);
 
 	FreeLibrary(st1);
-	DeleteCriticalSection(&scListContact);
+	DeleteCriticalSection(&csListContact);
 
 	_getch();
 	return 0;

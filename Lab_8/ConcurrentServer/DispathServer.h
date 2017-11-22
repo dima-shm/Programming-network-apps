@@ -9,20 +9,20 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 
 	try
 	{
-		while (*((TalkersCmd*)pPrm) != Exit)
+		while (*((TalkersCmd*)pPrm) != EXIT)
 		{
 			try
 			{
 				if (WaitForSingleObject(Event, 300) == WAIT_OBJECT_0)
 				{
-					if (&Work > 0)
+					if (&sInfo.Work > 0)
 					{
 						Contact *client = NULL;
 						int libuf = 1;
 						char CallBuf[50] = "",
 							SendError[50] = "ErrorInquiry";
 
-						EnterCriticalSection(&scListContact);
+						EnterCriticalSection(&csListContact);
 
 						for (ListContact::iterator p = listContacts.begin(); p != listContacts.end(); p++)
 						{
@@ -71,11 +71,11 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 									closesocket(client->s);
 									client->sthread = Contact::ABORT;
 									CancelWaitableTimer(client->htimer);
-									InterlockedIncrement(&Fail);
+									InterlockedIncrement(&sInfo.Fail);
 								}
 							}
 						}
-						LeaveCriticalSection(&scListContact);
+						LeaveCriticalSection(&csListContact);
 					}
 					SleepEx(0, true);
 				}
@@ -87,9 +87,9 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 			}
 		}
 	}
-	catch (string errorMsgText)
+	catch (string errorMessage)
 	{
-		cout << errorMsgText << endl;
+		cout << errorMessage << endl;
 	}
 
 	cout << "DispathServer остановлен" << endl;

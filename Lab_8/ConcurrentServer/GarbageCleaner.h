@@ -9,49 +9,45 @@ DWORD WINAPI GarbageCleaner(LPVOID pPrm)
 
 	DWORD rc = 0;
 
-	try
+	while ((*((TalkersCmd*)pPrm) != EXIT) && (&sInfo.Work > 0))
 	{
-		while (*((TalkersCmd*)pPrm) != Exit && &Work>0)
+		EnterCriticalSection(&csListContact); // Вход в критическую секцию
+
+		for (list<Contact>::iterator contact = listContacts.begin(); contact != listContacts.end();)
 		{
-			EnterCriticalSection(&scListContact);
-
-			for (list<Contact>::iterator first = listContacts.begin(); first != listContacts.end();)
+			if (contact->sthread == Contact::FINISH || 
+				contact->sthread == Contact::TIMEOUT || 
+				contact->sthread == Contact::ABORT || 
+				contact->type == Contact::EMPTY)
 			{
-				if (first->sthread == Contact::FINISH || first->sthread == Contact::TIMEOUT || first->sthread == Contact::ABORT || first->type == Contact::EMPTY)
-				{
-					printf("IP -адрес удаленного клиента:-%s", inet_ntoa(first->prms.sin_addr));
-					cout << " с кодом " << first->sthread << endl;
+				cout << "IP-адрес удаленного клиента: " << inet_ntoa(contact->prms.sin_addr);
+				cout << " с кодом " << contact->sthread << endl;
 
-					if (first->type == Contact::EMPTY)
-						InterlockedIncrement(&Fail);
-					else
-					{
-						if (first->sthread == Contact::FINISH)
-							InterlockedIncrement(&Finished);
-
-						if (first->sthread == Contact::TIMEOUT)
-							InterlockedIncrement(&Fail);
-
-						if (first->sthread == Contact::ABORT)
-							InterlockedIncrement(&Fail);
-
-						CloseHandle(first->hthread);
-						CloseHandle(first->htimer);
-					}
-					closesocket(first->s);
-					first = listContacts.erase(first);
-					InterlockedDecrement(&Work);
-				}
+				if (contact->type == Contact::EMPTY)
+					InterlockedIncrement(&sInfo.Fail);
 				else
-					first++;
+				{
+					if (contact->sthread == Contact::FINISH)
+						InterlockedIncrement(&sInfo.Finished);
+
+					if (contact->sthread == Contact::TIMEOUT)
+						InterlockedIncrement(&sInfo.Fail);
+
+					if (contact->sthread == Contact::ABORT)
+						InterlockedIncrement(&sInfo.Fail);
+
+					CloseHandle(contact->hthread);
+					CloseHandle(contact->htimer);
+				}
+				closesocket(contact->s);
+				contact = listContacts.erase(contact);
+				InterlockedDecrement(&sInfo.Work);
 			}
-			LeaveCriticalSection(&scListContact);
-			Sleep(1000);
+			else
+				contact++;
 		}
-	}
-	catch (string errorMsgText)
-	{
-		cout << errorMsgText << endl;
+		LeaveCriticalSection(&csListContact); // Выход из критической секции
+		Sleep(1000);
 	}
 
 	cout << "GarbageCleaner остановлен" << endl;

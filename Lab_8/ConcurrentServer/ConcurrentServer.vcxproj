@@ -153,6 +153,7 @@
     <ClInclude Include="GarbageCleaner.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="listContact.h" />
+    <ClInclude Include="statsInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

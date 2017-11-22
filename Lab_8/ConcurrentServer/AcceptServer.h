@@ -3,17 +3,17 @@
 
 static void WaitClients()
 {
-	bool ListEmpty = false;
-	while (!ListEmpty)
+	bool listIsEmpty = false;
+	while (!listIsEmpty)
 	{
-		EnterCriticalSection(&scListContact);
-		ListEmpty = listContacts.empty();
-		LeaveCriticalSection(&scListContact);
-		SleepEx(0, TRUE);
+		EnterCriticalSection(&csListContact);
+		listIsEmpty = listContacts.empty();
+		LeaveCriticalSection(&csListContact);
+		SleepEx(0, TRUE); // Приостановит поток для выполнения асинхронных процедур
 	}
 }
 
-bool AcceptCycle(int squirt, SOCKET* s)
+bool AcceptCycle(SOCKET* s)
 {
 	bool rc = false;
 	Contact c(Contact::ACCEPT, "AcceptServer");
@@ -22,42 +22,53 @@ bool AcceptCycle(int squirt, SOCKET* s)
 	if ((c.s = accept(*s, (sockaddr*)&c.prms, &c.lprms)) == INVALID_SOCKET)
 	{
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
-			throw SetErrorMsgText("Accept: ", WSAGetLastError());
+			throw SetErrorMsgText("accept: ", WSAGetLastError());
 	}
 	else
 	{
 		rc = true;
-		InterlockedIncrement(&Accept);
-		InterlockedIncrement(&Work);
-		EnterCriticalSection(&scListContact);
+		InterlockedIncrement(&sInfo.Accept); // Увеличить значение Accept на единицу
+		InterlockedIncrement(&sInfo.Work);   // Увеличить значение Work на единицу
+		EnterCriticalSection(&csListContact);
 		listContacts.push_front(c);
-		LeaveCriticalSection(&scListContact);
+		LeaveCriticalSection(&csListContact);
 		SetEvent(Event);
 	}
 	return rc;
 };
 
-void CommandsCycle(TalkersCmd& cmd, SOCKET* s)
+void CommandsCycle(TalkersCmd& tCmd, SOCKET* s) // Цикл обработки команд
 {
 	int squirt = 0;
-	while (cmd != Exit)
+	while (tCmd != EXIT) // Цикл обработки команд консоли и подключений
 	{
-		switch (cmd)
+		switch (tCmd)
 		{
-		case Start:	cmd = Getcommand; squirt = AS_SQUIRT; break;
-		case Stop:	cmd = Getcommand; squirt = 0; break;
-		case Wait:	   WaitClients(); cmd = Getcommand; squirt = AS_SQUIRT; break;
-		case Shutdown: WaitClients(); cmd = Exit; break;
+		case START:	   
+			tCmd = GETCOMMAND;  // Возобновить подключение клиентов
+			squirt = AS_SQUIRT; // #define AS_SQUIRT 10
+			break; 
+		case STOP:	   
+			tCmd = GETCOMMAND; // Остановить подключение клиентов
+			squirt = 0; 
+			break;
+		case WAIT:	   
+			tCmd = GETCOMMAND; 
+			squirt = AS_SQUIRT; 
+			WaitClients();
+			break;
+		case SHUTDOWN:
+			tCmd = EXIT;
+			WaitClients();
+			break;
 		};
 
-		if (cmd != Exit && squirt>Work)
+		if ((tCmd != EXIT) && (sInfo.Work < squirt))
 		{
-			if (AcceptCycle(squirt, s))
-			{
-				cmd = Getcommand;
-			}
+			if (AcceptCycle(s))
+				tCmd = GETCOMMAND;
 
-			SleepEx(0, TRUE);
+			SleepEx(0, TRUE); // Выполнить асинхронные процедуры
 		}
 	}
 };
@@ -93,8 +104,8 @@ DWORD WINAPI AcceptServer(LPVOID pPrm)
 		if (ioctlsocket(sS, FIONBIO, &(nonblk)) == SOCKET_ERROR)
 			throw SetErrorMsgText("ioctlsocket: ", WSAGetLastError());
 
-		TalkersCmd* command = (TalkersCmd*)pPrm;
-		CommandsCycle(*((TalkersCmd*)command), &sS);
+		TalkersCmd* tCmd = (TalkersCmd*)pPrm;
+		CommandsCycle(*tCmd, &sS);
 
 		if (closesocket(sS) == SOCKET_ERROR)
 			throw SetErrorMsgText("closesocket: ", WSAGetLastError());

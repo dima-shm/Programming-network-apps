@@ -7,74 +7,91 @@ DWORD WINAPI ConsolePipe(LPVOID pPrm)
 
 	DWORD rc = 0;
 	HANDLE hPipe;
-	TalkersCmd tCmd = *((TalkersCmd*)pPrm);
 
-	hPipe = CreateNamedPipe(L"\\\\.\\pipe\\shm-tube",
-		PIPE_ACCESS_DUPLEX,
-		PIPE_TYPE_MESSAGE | PIPE_WAIT,
-		1, NULL, NULL,
-		INFINITE, NULL);
-
-	while (tCmd != Exit)
+	try
 	{
-		if (ConnectNamedPipe(hPipe, NULL))
-		{
-			cout << "Установлено соединение с RemoteConsole" << endl << endl;
+		if ((hPipe = CreateNamedPipe(L"\\\\.\\pipe\\shm-tube",
+			PIPE_ACCESS_DUPLEX,
+			PIPE_TYPE_MESSAGE | PIPE_WAIT,
+			1, NULL, NULL,
+			INFINITE, NULL)) == INVALID_HANDLE_VALUE)
+			throw SetErrorMsgText("CreateNamedPipe: ", GetLastError());
 
-			char readBuf[1];
+		while (*((TalkersCmd*)pPrm) != EXIT)
+		{
+			if (!ConnectNamedPipe(hPipe, NULL))
+				throw SetErrorMsgText("ConnectNamedPipe: ", GetLastError());
+
+			cout << endl << "Установлено соединение с RemoteConsole" << endl << endl;
+
+			char readBuf[10],
+				writeBuf[50];
 			DWORD lBuf;
 
-			while (tCmd != Exit)
+			while (*((TalkersCmd*)pPrm) != EXIT)
 			{
-				ReadFile(hPipe, readBuf, sizeof(readBuf), &lBuf, NULL);
-
-				if (lBuf > 0)
+				if (*((TalkersCmd*)pPrm) == GETCOMMAND)
 				{
-					switch (atoi(readBuf))
+					if (!ReadFile(hPipe, readBuf, sizeof(readBuf), &lBuf, NULL))
+						break;
+
+					if (lBuf > 0)
 					{
-					case 1:
-						tCmd = TalkersCmd::Start;
-						WriteFile(hPipe, "Запуск", sizeof("Запуск"), &lBuf, NULL);
-						cout << "ConsolePipe: команда " << "Запуск" << endl;
-						break;
-					case 2:
-						tCmd = TalkersCmd::Stop;
-						WriteFile(hPipe, "Остановка", sizeof("Остановка"), &lBuf, NULL);
-						cout << "ConsolePipe: команда " << "Остановка" << endl;
-						break;
-					case 3:
-						tCmd = TalkersCmd::Exit;
-						WriteFile(hPipe, "Выход", sizeof("Выход"), &lBuf, NULL);
-						cout << "ConsolePipe: команда " << "Выход" << endl;
-						break;
-					case 4:
-						tCmd = TalkersCmd::Wait;
-						WriteFile(hPipe, "Ожидание", sizeof("Ожидание"), &lBuf, NULL);
-						cout << "ConsolePipe: команда " << "Ожидание" << endl;
-						break;
-					case 5:
-						cout << endl;
-						cout << "Подключено: " << Accept << endl;
-						cout << "Успешно:    " << Finished << endl;
-						cout << "Работают:   " << Work << endl;
-						cout << "Ошибка:     " << Fail << endl;
-						WriteFile(hPipe, "Статистика", sizeof("Статистика"), &lBuf, NULL);
-						break;
-					case 6:
-						tCmd = TalkersCmd::Shutdown;
-						WriteFile(hPipe, "Выключение", sizeof("Выключение"), &lBuf, NULL);
-						cout << "ConsolePipe: команда " << "Выключение" << endl;
-						break;
+						switch (atoi(readBuf))
+						{
+						case 1:
+							*((TalkersCmd*)pPrm) = TalkersCmd::START;
+							WriteFile(hPipe, "Запуск", sizeof("Запуск"), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Запуск" << endl;
+							break;
+						case 2:
+							*((TalkersCmd*)pPrm) = TalkersCmd::STOP;
+							WriteFile(hPipe, "Остановка", sizeof("Остановка"), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Остановка" << endl;
+							break;
+						case 3:
+							*((TalkersCmd*)pPrm) = TalkersCmd::EXIT;
+							WriteFile(hPipe, "Выход", sizeof("Выход"), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Выход" << endl;
+							break;
+						case 4: 
+							*((TalkersCmd*)pPrm) = TalkersCmd::STATISTICS;
+							sprintf_s(writeBuf, "\nПодключено: %i\nОшибка: %i\nУспешно: %i\nРаботают: %i", sInfo.Accept, sInfo.Fail, sInfo.Finished, sInfo.Work);
+							WriteFile(hPipe, writeBuf, sizeof(writeBuf), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Статистика" << endl;
+							break;
+						case 5:
+							*((TalkersCmd*)pPrm) = TalkersCmd::WAIT;
+							WriteFile(hPipe, "Ожидание", sizeof("Ожидание"), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Ожидание" << endl;
+							break;
+						case 6:
+							*((TalkersCmd*)pPrm) = TalkersCmd::SHUTDOWN;
+							WriteFile(hPipe, "Выключение", sizeof("Выключение"), &lBuf, NULL);
+							cout << "ConsolePipe: команда " << "Выключение" << endl;
+							break;
+						default:
+							cout << "ConsolePipe: неизвестная команда" << endl;
+							break;
+						}
 					}
 				}
+				else
+					Sleep(1000);
 			}
+			if (!DisconnectNamedPipe(hPipe))
+				throw SetErrorMsgText("DisconnectNamedPipe: ", GetLastError());
 		}
+
+		DisconnectNamedPipe(hPipe);
+		CloseHandle(hPipe);
+
+		cout << "ConsolePipe остановлен" << endl;
 	}
-
-	DisconnectNamedPipe(hPipe);
-	CloseHandle(hPipe);
-
-	cout << "ConsolePipe остановлен" << endl;
+	catch (string errorMessage)
+	{
+		cout << errorMessage << endl;
+	}
 
 	ExitThread(rc);
 }
