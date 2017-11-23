@@ -8,62 +8,16 @@ DWORD WINAPI TimeServer(LPVOID lParam)
 
 	QueueUserAPC(ASStartMessage, client->hAcceptServer, (DWORD)client);
 
-	try
-	{
-		client->sthread = Contact::WORK;
+	client->sthread = Contact::WORK;
 
-		int bytes = 1;
-		char ibuf[50],
-			Time[50] = "Time";
+	SYSTEMTIME stime;
+	GetLocalTime(&stime);
+	sprintf_s(client->msg, "%d.%d.%d %d:%02d:%d", stime.wDay, stime.wMonth, stime.wYear, stime.wHour, stime.wMinute, stime.wSecond);
 
-		while (client->TimerOff == false)
-		{
-			if ((bytes = recv(client->s, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
-			{
-				if (WSAGetLastError() == WSAEWOULDBLOCK)
-					Sleep(100);
-				else
-					throw SetErrorMsgText("recv: ", WSAGetLastError());
-			}
-			else
-			{
-				if (strcmp(ibuf, "Time") == 0)
-				{
-					if (client->TimerOff != false)
-						break;
+	CancelWaitableTimer(client->htimer);
+	client->sthread = Contact::FINISH;
 
-					SYSTEMTIME stt;
-					GetLocalTime(&stt);
-
-					sprintf_s(ibuf, "%s %d.%d.%d/%d:%02d:%d", Time, stt.wDay, stt.wMonth, stt.wYear, stt.wHour, stt.wMinute, stt.wSecond);
-
-					if ((send(client->s, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
-						throw SetErrorMsgText("send: ", WSAGetLastError());
-				}
-				else
-					break;
-			}
-		}
-
-
-		if (client->TimerOff == false)
-		{
-			CancelWaitableTimer(client->htimer);
-
-			if ((send(client->s, "TimeServer завершил работу", sizeof("TimeServer завершил работу"), NULL)) == SOCKET_ERROR)
-				throw SetErrorMsgText("send: ", WSAGetLastError());
-
-			client->sthread = Contact::FINISH;
-
-			QueueUserAPC(ASFinishMessage, client->hAcceptServer, (DWORD)client);
-		}
-	}
-	catch (string errorMsgText)
-	{
-		std::cout << errorMsgText << std::endl;
-		CancelWaitableTimer(client->htimer);
-		client->sthread = Contact::ABORT;
-	}
+	QueueUserAPC(ASFinishMessage, client->hAcceptServer, (DWORD)client);
 
 	ExitThread(rc);
 }

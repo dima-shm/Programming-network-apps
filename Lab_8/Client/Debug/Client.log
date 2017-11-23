@@ -1,4 +1,2 @@
 ﻿  main.cpp
-c:\users\dima-\desktop\lab_8\client\main.cpp(29): warning C4101: obuf: неиспользованная локальная переменная
-c:\users\dima-\desktop\lab_8\client\main.cpp(48): warning C4715: GetServer: значение возвращается не при всех путях выполнения
   Client.vcxproj -> C:\Users\dima-\Desktop\Lab_8\Debug\Client.exe

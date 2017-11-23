@@ -24,7 +24,6 @@ struct Contact // Элемент списка подключений
 	char msg[50];               // Сообщение
 	char srvname[15];           // Наименование обслуживающего сервера
 	bool TimerOff;
-	bool CloseConn;
 	HANDLE hAcceptServer;
 	Contact(TE t = EMPTY, const char* namesrv = "") // Конструктор
 	{
@@ -33,7 +32,6 @@ struct Contact // Элемент списка подключений
 		type = t;
 		strcpy_s(srvname, namesrv);
 		msg[0] = 0;
-		CloseConn = false;
 		TimerOff = false;
 	};
 	void SetST(ST sth, const char* m = "")
