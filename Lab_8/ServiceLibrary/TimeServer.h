@@ -20,11 +20,10 @@ DWORD WINAPI TimeServer(LPVOID lParam)
 		{
 			if ((bytes = recv(client->s, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
 			{
-				switch (WSAGetLastError())
-				{
-				case WSAEWOULDBLOCK: Sleep(100); break;
-				default: throw SetErrorMsgText("recv: ", WSAGetLastError());
-				}
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+					Sleep(100);
+				else
+					throw SetErrorMsgText("recv: ", WSAGetLastError());
 			}
 			else
 			{

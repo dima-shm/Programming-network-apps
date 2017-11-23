@@ -1,4 +1,3 @@
 ﻿  dllmain.cpp
-c:\users\dima-\desktop\lab_8\servicelibrary\randserver.h(37): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
-     Создается библиотека C:\Users\dima-\Desktop\Lab_8\Debug\ServiceLibrary.lib и объект C:\Users\dima-\Desktop\Lab_8\Debug\ServiceLibrary.exp
+c:\users\dima-\desktop\lab_8\servicelibrary\randserver.h(30): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
   ServiceLibrary.vcxproj -> C:\Users\dima-\Desktop\Lab_8\Debug\ServiceLibrary.dll

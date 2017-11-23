@@ -2,15 +2,17 @@
 #include "func_ErrorMsgText.h"
 #include "listContact.h"
 #include "statsInfo.h"
-#include <time.h>
 #include "conio.h"
+#include <time.h>
 #define AS_SQUIRT 10
 
-int tport = 2000;							  // TCP-порт
-int uport = 2000;							  // UDP-порт
-char* npname = "\\\\.\\pipe\\shm-tube";		  // Имя Named Pipe
-char* call = "dima-shm";					  // Позывной
-char* dllname = "ServiceLibrary";			  // Название DLL библиотеки
+int   tport  = 2000,					// TCP-порт   (по умолчанию)
+	  uport  = 2000;					// UDP-порт   (по умолчанию)
+char* npname = "\\\\.\\pipe\\shm-tube";	// Named Pipe (по умолчанию)
+char* call   = "dima-shm";				// Позывной   (по умолчанию)
+
+HMODULE serviceLib;			 // Библиотека dll
+HANDLE(*tableService)(char*, LPVOID);
 
 HANDLE hAcceptServer, // Дескриптор потока AcceptServer
 	hConsolePipe,	  // Дескриптор потока ConsolePipe
@@ -20,51 +22,24 @@ HANDLE Event = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 enum TalkersCmd { START, STOP, EXIT, STATISTICS, WAIT, SHUTDOWN, GETCOMMAND }; // Команды сервера
 
+// volatile — необходимость размещения переменной tCmd в памяти без выполнения оптимизации
+volatile TalkersCmd tCmd = START;
+
 volatile StatsInfo sInfo; // Структура для сбора необходимой статистики
 
 ListContact listContacts;		// Список подключений
 CRITICAL_SECTION csListContact; // Критическая секция для списка подключений
 
-HANDLE(*ts1)(char*, LPVOID);
-HMODULE st1;
-
-void CALLBACK ASStartMessage(DWORD Lprm)
-{
-	Contact *client = (Contact*)Lprm;
-
-	SYSTEMTIME stime;
-	GetLocalTime(&stime);
-
-	cout << stime.wDay << "." << stime.wMonth << "." << stime.wYear << " " << stime.wHour << ":" << stime.wMinute << endl;
-	cout << "Клиент " << client->srvname << " начал работу" << endl;
-}
-
-void CALLBACK ASFinishMessage(DWORD Lprm)
-{
-	Contact *client = (Contact*)Lprm;
-
-	SYSTEMTIME stime;
-	GetLocalTime(&stime);
-
-	cout << stime.wDay << "." << stime.wMonth << "." << stime.wYear << " " << stime.wHour << ":" << stime.wMinute << endl;
-	cout << "Клиент " << client->srvname << " завершил работу" << endl;
-}
-
 void CALLBACK ASWTimer(LPVOID Lprm, DWORD, DWORD)
 {
-	char obuf[50] = "Close: timeout";
 	Contact *client = (Contact*)Lprm;
-	EnterCriticalSection(&csListContact);
 	client->TimerOff = true;
 	client->sthread = Contact::TIMEOUT;
-	LeaveCriticalSection(&csListContact);
-
-	if ((send(client->s, obuf, sizeof(obuf) + 1, NULL)) == SOCKET_ERROR)
-		throw SetErrorMsgText("send: ", WSAGetLastError());
 
 	SYSTEMTIME stime;
 	GetLocalTime(&stime);
 
+	cout << endl;
 	cout << stime.wDay << "." << stime.wMonth << "." << stime.wYear << " " << stime.wHour << ":" << stime.wMinute << endl;
-	cout << client->srvname << endl;
+	cout << "TIMEOUT " << client->srvname << endl;
 }

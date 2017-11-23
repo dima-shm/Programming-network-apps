@@ -6,65 +6,47 @@
 
 using namespace std;
 
-bool portIsCorrect(int port) 
+bool portIsCorrect(int port)
 {
 	return (port >= 0 && port <= 65535);
 }
 
-int main(int argc, char* argv[])
+void main(int argc, char* argv[])
 {
 	setlocale(0, "");
 	SetConsoleTitle(L"ConcurrentServer");
-	srand((unsigned)time(NULL));
 
 	if (argc > 1)
 	{
 		if (portIsCorrect(atoi(argv[1])))
-			cout << "TCP-порт:   " << (tport = atoi(argv[1])) << endl;
+			cout << "TCP-порт:       " << (tport = atoi(argv[1])) << endl;
 		else
 			cout << "Некорректный TCP-порт" << endl;
 	}
 	else
-		cout << "TCP-порт:   " << tport << "              (default)" << endl;
-
-
+		cout << "TCP-порт:       " << tport << "               (по умолчанию)" << endl;
 	if (argc > 2)
 	{
 		if (portIsCorrect(atoi(argv[2])))
-			cout << "UDP-порт:   " << (uport = atoi(argv[2])) << endl;
+			cout << "UDP-порт:       " << (uport = atoi(argv[2])) << endl;
 		else
 			cout << "Некорректный UDP-порт" << endl;
 	}
 	else
-		cout << "UDP-порт:   " << uport << "              (default)" << endl;
-
-
+		cout << "UDP-порт:       " << uport << "               (по умолчанию)" << endl;
 	if (argc > 3)
-		dllname = argv[3];
-
-
+		cout << "Named Pipe:     " << (npname = argv[3]) << endl;
+	else
+		cout << "Named Pipe:     " << npname << "  (по умолчанию)" << endl;
 	if (argc > 4)
-		cout << "Named Pipe: " << (npname = argv[4]) << endl;
+		cout << "Позывной:       " << (call = argv[4]) << endl;
 	else
-		cout << "Named Pipe: " << npname << " (default)" << endl;
-
-
-	if (argc > 5)
-		cout << "Позывной:   " << (call = argv[5]) << endl;
+		cout << "Позывной:       " << call << "           (по умолчанию)" << endl;
+	if ((serviceLib = LoadLibrary(L"ServiceLibrary.dll")) == NULL)
+		cout << "DLL-библиотека: ServiceLibrary.dll НЕ загружена" << endl << endl;
 	else
-		cout << "Позывной:   " << call << "          (default)" << endl;
-
-
-	st1 = LoadLibrary(L"ServiceLibrary.dll");
-	ts1 = (HANDLE(*)(char*, LPVOID))GetProcAddress(st1, "SSS");
-	if (st1 == NULL)
-		cout << "Не удалось загрузить DLL-библиотеку" << endl << endl;
-	else
-		cout << "Загружена DLL-библиотека: " << dllname << endl << endl;
-
-
-	// volatile — необходимость размещения переменной tCmd в памяти без выполнения оптимизации
-	volatile TalkersCmd tCmd = START; // Команды сервера
+		cout << "DLL-библиотека: ServiceLibrary.dll загружена " << endl << endl;
+	tableService = (HANDLE(*)(char*, LPVOID))GetProcAddress(serviceLib, "SSS");
 
 	InitializeCriticalSection(&csListContact);
 
@@ -91,9 +73,9 @@ int main(int argc, char* argv[])
 	CloseHandle(hGarbageCleaner);
 	CloseHandle(hDispathServer);
 
-	FreeLibrary(st1);
+	FreeLibrary(serviceLib);
+
 	DeleteCriticalSection(&csListContact);
 
 	_getch();
-	return 0;
 }

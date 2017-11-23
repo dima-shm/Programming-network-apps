@@ -1,7 +1,6 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <iostream>
-#include "conio.h"
 #include <string>
 #include "Winsock2.h"              // заголовок WS2_32.dll
 #pragma comment(lib, "WS2_32.lib") // экспорт WS2_32.dll

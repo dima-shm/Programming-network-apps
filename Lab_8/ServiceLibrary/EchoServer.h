@@ -12,26 +12,25 @@ DWORD WINAPI EchoServer(LPVOID lParam)
 	{
 		client->sthread = Contact::WORK;
 		int  bytes = 1;
-		char ibuf[50];
+		char buf[50];
 		
 		while(client->TimerOff == false)
 		{
-			if((bytes = recv(client->s, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
+			if((bytes = recv(client->s, buf, sizeof(buf), NULL)) == SOCKET_ERROR)
 			{
-				switch (WSAGetLastError())
-				{
-				case WSAEWOULDBLOCK: Sleep(100); break;
-				default: throw SetErrorMsgText("recv: ", WSAGetLastError());
-				}
+				if (WSAGetLastError() == WSAEWOULDBLOCK)
+					Sleep(100);
+				else
+					throw SetErrorMsgText("recv: ", WSAGetLastError());
 			}
 			else
 			{
-				if(strcmp(ibuf, "exit") != 0)
+				if(strcmp(buf, "exit") != 0)
 				{
 					if (client->TimerOff != false)
 						break;
 					
-					if((send(client->s, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
+					if((send(client->s, buf, sizeof(buf), NULL)) == SOCKET_ERROR)
 						throw SetErrorMsgText("send: ", WSAGetLastError());
 				}
 				else

@@ -33,6 +33,8 @@ struct Contact // Элемент списка подключений
 		type = t;
 		strcpy_s(srvname, namesrv);
 		msg[0] = 0;
+		CloseConn = false;
+		TimerOff = false;
 	};
 	void SetST(ST sth, const char* m = "")
 	{

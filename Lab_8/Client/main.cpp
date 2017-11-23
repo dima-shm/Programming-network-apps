@@ -18,6 +18,10 @@ bool SystemMessage(char *ch)
 	return result;
 }
 
+bool portIsCorrect(int port)
+{
+	return (port >= 0 && port <= 65535);
+}
 
 bool GetServer(char* call, SOCKADDR_IN* from, int* flen, SOCKET * cC, SOCKADDR_IN * all)
 {
@@ -43,7 +47,7 @@ bool GetServer(char* call, SOCKADDR_IN* from, int* flen, SOCKET * cC, SOCKADDR_I
 	}
 }
 
-void main()
+void main(int argc, char* argv[])
 {
 	setlocale(0, "");
 	SetConsoleTitle(L"Client");
@@ -51,9 +55,27 @@ void main()
 	WSADATA wsaData;
 	SOCKET cS;
 	SOCKADDR_IN serv;
-	char servName[50] = "DIMA";
-	char call[50] = "dima-shm";
-	int port = 2000;
+	char* servName = "DIMA";
+	char* call = "dima-shm";
+	int   port = 2000;
+
+	if (argc > 1)
+		cout << "Имя сервера: " << (servName = argv[1]) << endl;
+	else
+		cout << "Имя сервера: " << servName << "      (по умолчанию)" << endl;
+	if (argc > 2)
+		cout << "Псевдоним:   " << (call = argv[2]) << endl;
+	else
+		cout << "Псевдоним:   " << call << "  (по умолчанию)" << endl;
+	if (argc > 3)
+	{
+		if (portIsCorrect(atoi(argv[3])))
+			cout << "Порт:        " << (port = atoi(argv[3])) << endl;
+		else
+			cout << "Некорректный порт" << endl;
+	}
+	else
+		cout << "Порт:        " << port << "      (по умолчанию)" << endl;
 
 	try
 	{
@@ -63,121 +85,45 @@ void main()
 		if ((cS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
 			throw SetErrorMsgText("socket: ", WSAGetLastError());
 
-		int ch = 0;
-		bool fin = false;
-		int cCall = 0;
-		int lobuf = 1;
-		char obuf[50];
-		char Call[50];
-
-		cout << "Введите имя сервера: "; cin >> servName;
 		hostent* s = gethostbyname(servName);
-		if (s == NULL)
-			throw "Сервер не найден";
-
-		cout << "Введите порт сервера: "; cin >> port;
-
 		serv.sin_addr = *(struct in_addr *)s->h_addr_list[0];
 		serv.sin_family = AF_INET;
 		serv.sin_port = htons(port);
 
+		int cmd;
+		char obuf[50],
+			ibuf[50];
+
 		if ((connect(cS, (sockaddr*)&serv, sizeof(serv))) == SOCKET_ERROR)
-			throw "Ошибка подключения: connect";
+			throw SetErrorMsgText("connect: ", WSAGetLastError());
 
-		while (!fin)
+		cout << endl;
+		cout << "Команды:" << endl;
+		cout << "[1] – rand" << endl;
+		cout << "[2] – time" << endl;
+		cout << "[3] – echo" << endl;
+		cout << "[4] – Выйти из Client" << endl;
+		cin >> cmd;
+
+		if ((cmd > 0) && (cmd < 4))
 		{
-			cout << "[1] – Rand" << endl;
-			cout << "[2] – Time" << endl;
-			cout << "[3] – Echo" << endl;
-			cin >> cCall;
-
-			if (cCall == 1 || cCall == 2 || cCall == 3)
+			switch (cmd)
 			{
-				fin = true;
-				break;
-			}
-			else
-			{
-				if (closesocket(cS) == SOCKET_ERROR)
-					throw SetErrorMsgText("closesocket: ", WSAGetLastError());
-
-				throw "Вы неправильно ввели код команду";
-			}
-		}
-
-		switch (cCall)
-		{
-		case 1:	strcpy_s(Call, "Rand");
-			cout << "Enter Rand command or other:" << endl;
-			break;
-		case 2: strcpy_s(Call, "Time");
-			cout << "Enter Time command or other:" << endl;
-			break;
-		case 3:	strcpy_s(Call, "Echo");
-			cout << "Enter string or exit :" << endl;
-			break;
-		default: strcpy_s(Call, "Echo");
-		}
-
-		if ((lobuf = send(cS, Call, sizeof(Call), NULL)) == SOCKET_ERROR)
-			throw SetErrorMsgText("send: ", WSAGetLastError());
-
-		char rCall[50];
-		if ((lobuf = recv(cS, rCall, sizeof(rCall), NULL)) == SOCKET_ERROR)
-			throw SetErrorMsgText("recv: ", WSAGetLastError());
-
-		if (strcmp(Call, rCall) != 0)
-			throw "Ошибка сервера";
-		else
-		{
-			bool Check = true;
-			fin = false;
-
-			u_long nonblk = 1;
-			if (SOCKET_ERROR == ioctlsocket(cS, FIONBIO, &nonblk))
-				throw SetErrorMsgText("Ioctlsocket: ", WSAGetLastError());
-
-			clock_t StartTime = clock();
-			bool rcv = true;
-
-			char iib[50];
-			cin >> iib;
-
-			while (!fin)
-			{
-				if (rcv)
-				{
-					if ((lobuf = send(cS, iib, sizeof(iib), NULL)) == SOCKET_ERROR)
-						throw "Error;";
-
-					rcv = false;
-				}
-
-				if ((recv(cS, obuf, sizeof(obuf), NULL)) == SOCKET_ERROR)
-				{
-					switch (WSAGetLastError())
-					{
-					case WSAEWOULDBLOCK: Sleep(100); break;
-					default: throw SetErrorMsgText("recv: ", WSAGetLastError());
-					}
-				}
-				else
-				{
-					if (SystemMessage(obuf))
-					{
-						printf("Сервер остановил подключение: %s\n", obuf);
-						break;
-					}
-					else
-						printf("Принято сообщение: [%s]\n", obuf);
-
-					rcv = true;
-				}
+			case 1: strcpy_s(obuf, "Rand"); break;
+			case 2: strcpy_s(obuf, "Time"); break;
+			case 3: strcpy_s(obuf, "Echo"); break;
 			}
 
-			clock_t FinishTime = clock();
-			printf("Время: %lf сек.\n", (double)(FinishTime - StartTime) / CLOCKS_PER_SEC);
+			if (send(cS, obuf, sizeof(obuf), NULL) == SOCKET_ERROR)
+				throw SetErrorMsgText("send: ", WSAGetLastError());
+
+			if (recv(cS, ibuf, sizeof(ibuf), NULL) == SOCKET_ERROR)
+				throw SetErrorMsgText("recv: ", WSAGetLastError());
+
+			cout << "Ответ от сервера: " << ibuf << endl;
 		}
+		else if (cmd > 4)
+			cout << "Введена несуществующая команда [" << cmd << "]" << endl << endl;
 
 		if (closesocket(cS) == SOCKET_ERROR)
 			throw SetErrorMsgText("closesocket: ", WSAGetLastError());

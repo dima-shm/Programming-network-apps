@@ -38,7 +38,7 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 										switch (WSAGetLastError())
 										{
 										case WSAEWOULDBLOCK: Sleep(100); break;
-										default: throw SetErrorMsgText("Recv: ", WSAGetLastError());
+										default: throw SetErrorMsgText("recv: ", WSAGetLastError());
 										}
 									}
 									else
@@ -59,15 +59,15 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 									SetWaitableTimer(client->htimer, (LARGE_INTEGER*)&time, 0, ASWTimer, client, false);
 
 									if ((libuf = send(client->s, CallBuf, sizeof(CallBuf), NULL)) == SOCKET_ERROR)
-										throw SetErrorMsgText("Send: ", WSAGetLastError());
+										throw SetErrorMsgText("send: ", WSAGetLastError());
 
-									client->hthread = ts1(CallBuf, client);
+									client->hthread = tableService(CallBuf, client);
 								}
 
 								else
 								{
 									if ((libuf = send(client->s, SendError, sizeof(SendError) + 1, NULL)) == SOCKET_ERROR)
-										throw SetErrorMsgText("Send: ", WSAGetLastError());
+										throw SetErrorMsgText("send: ", WSAGetLastError());
 									closesocket(client->s);
 									client->sthread = Contact::ABORT;
 									CancelWaitableTimer(client->htimer);

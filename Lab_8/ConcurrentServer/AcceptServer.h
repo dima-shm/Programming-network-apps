@@ -113,12 +113,12 @@ DWORD WINAPI AcceptServer(LPVOID pPrm)
 		if (WSACleanup() == SOCKET_ERROR)
 			throw SetErrorMsgText("cleanup: ", WSAGetLastError());
 	}
-	catch (string errorMsgText)
+	catch (string errorMessage)
 	{
-		cout << errorMsgText << endl;
+		cout << errorMessage << endl;
 	}
 
 	cout << "AcceptServer остановлен" << endl;
 
-	ExitThread(rc); // Завершение работы потока
+	ExitThread(rc);
 }
