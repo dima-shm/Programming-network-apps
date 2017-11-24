@@ -7,9 +7,9 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 
 	DWORD rc = 0;
 
-	try
+	while (*((TalkersCmd*)pPrm) != EXIT)
 	{
-		while (*((TalkersCmd*)pPrm) != EXIT)
+		try
 		{
 			if (WaitForSingleObject(Event, 300) == WAIT_OBJECT_0)
 			{
@@ -73,10 +73,10 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 			}
 			SleepEx(0, true);
 		}
-	}
-	catch (string errorMessage)
-	{
-		cout << errorMessage << endl;
+		catch (string errorMessage)
+		{
+			cout << errorMessage << endl;
+		}
 	}
 
 	cout << "DispathServer остановлен" << endl;
