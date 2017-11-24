@@ -40,6 +40,6 @@ void CALLBACK ASWTimer(LPVOID Lprm, DWORD, DWORD)
 	GetLocalTime(&stime);
 
 	cout << endl;
+	cout << "Превышено время работы клиента " << client->srvname << endl;
 	cout << stime.wDay << "." << stime.wMonth << "." << stime.wYear << " " << stime.wHour << ":" << stime.wMinute << endl;
-	cout << "TIMEOUT " << client->srvname << endl;
 }

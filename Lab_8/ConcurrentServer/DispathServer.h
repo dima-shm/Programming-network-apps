@@ -35,34 +35,35 @@ DWORD WINAPI DispathServer(LPVOID pPrm)
 									else
 										throw SetErrorMsgText("recv: ", WSAGetLastError());
 								else
-								{
 									Check = true;
-									if (strcmp(buf, "Rand") == 0 || 
-										strcmp(buf, "Echo") == 0 || 
-										strcmp(buf, "Time") == 0)
-									{
-										client->type = Contact::CONTACT;
-										strcpy_s(client->srvname, buf);
-										client->htimer = CreateWaitableTimer(NULL, false, NULL);
-										_int64 time = -600000000;
-										SetWaitableTimer(client->htimer, (LARGE_INTEGER*)&time, 0, ASWTimer, client, false);
+							}
 
-										client->hthread = tableService(buf, client);
-										strcpy_s(client->msg, buf);
 
-										Sleep(100);
-										if (send(client->s, client->msg, sizeof(client->msg), NULL) == SOCKET_ERROR)
-											throw SetErrorMsgText("send: ", WSAGetLastError());
-									} 
-									else
-									{
-										if (send(client->s, "Error", sizeof("Error"), NULL) == SOCKET_ERROR)
-											throw SetErrorMsgText("send: ", WSAGetLastError());
-										closesocket(client->s);
-										client->sthread = Contact::ABORT;
-										InterlockedIncrement(&sInfo.Fail);
-									}								
-								}
+							if (strcmp(buf, "Rand") == 0 ||
+								strcmp(buf, "Echo") == 0 ||
+								strcmp(buf, "Time") == 0)
+							{
+								client->type = Contact::CONTACT;
+								strcpy_s(client->srvname, buf);
+								client->htimer = CreateWaitableTimer(NULL, false, NULL);
+								_int64 time = -10000;
+								SetWaitableTimer(client->htimer, (LARGE_INTEGER*)&time, 0, ASWTimer, client, false);
+
+								client->hthread = tableService(buf, client);
+								strcpy_s(client->msg, buf);
+
+								Sleep(100);
+								if (send(client->s, client->msg, sizeof(client->msg), NULL) == SOCKET_ERROR)
+									throw SetErrorMsgText("send: ", WSAGetLastError());
+							}
+							else
+							{
+								if (send(client->s, "Error", sizeof("Error"), NULL) == SOCKET_ERROR)
+									throw SetErrorMsgText("send: ", WSAGetLastError());
+								closesocket(client->s);
+								client->sthread = Contact::ABORT;
+								CancelWaitableTimer(client->htimer);
+								InterlockedIncrement(&sInfo.Fail);
 							}
 						}
 					}

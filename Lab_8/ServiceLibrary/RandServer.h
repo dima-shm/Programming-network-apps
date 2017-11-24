@@ -13,6 +13,7 @@ DWORD WINAPI RandServer(LPVOID lParam)
 	srand(time(NULL));
 	_itoa_s(rand(), client->msg, 10);
 
+	Sleep(15000);
 	CancelWaitableTimer(client->htimer);
 	client->sthread = Contact::FINISH;
 

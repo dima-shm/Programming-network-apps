@@ -52,12 +52,12 @@ void main(int argc, char* argv[])
 			ibuf[50];
 
 		cout << endl;
-		cout << " оманды:" << endl;
-		cout << "[1] Ц rand" << endl;
-		cout << "[2] Ц time" << endl;
-		cout << "[3] Ц echo" << endl;
+		cout << "¬ыберите тип сервера:" << endl;
+		cout << "[1] Ц Rand" << endl;
+		cout << "[2] Ц Time" << endl;
+		cout << "[3] Ц Echo" << endl;
 		cout << "[4] Ц ¬ыйти из Client" << endl;
-		cout << "¬вод: ";  cin >> cmd; cout << endl;
+		cin >> cmd; cout << endl;
 
 		if ((cmd > 0) && (cmd < 4))
 		{

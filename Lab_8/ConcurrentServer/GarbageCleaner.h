@@ -41,6 +41,7 @@ DWORD WINAPI GarbageCleaner(LPVOID pPrm)
 				}
 				closesocket(contact->s);
 				contact = listContacts.erase(contact);
+				InterlockedDecrement(&sInfo.Accept);
 				InterlockedDecrement(&sInfo.Work);
 			}
 			else
